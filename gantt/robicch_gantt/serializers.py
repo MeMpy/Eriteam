@@ -34,7 +34,7 @@ class TaskSerializerRob(TaskSerializer):
 
         # Instantiate the superclass normally
         super(TaskSerializerRob, self).__init__(*args, **kwargs)
-        #TODO generalize in a common superclass
+        #TODO generalize in a common superclass??
         self.fields.pop('assignment_set')
 
     def has_child(self, obj):
@@ -73,14 +73,26 @@ class TaskSerializerRob(TaskSerializer):
                 )
 
 
-
-
-class ResourceSerializerRob(ResourceSerializer):
-
-    pass
-
-
 class ProjectSerializerRob(ProjectSerializer):
 
     tasks = TaskSerializerRob(source='task_set', many=True, read_only=True)
+
+    ##############################################
+    # ACTIONS
+    ##############################################
+
+    def create(self, validated_data):
+        user = validated_data.pop('user')
+
+
+        # return parent.addTask(
+        #         validated_data['name'],
+        #         validated_data['code'],
+        #         validated_data['description'],
+        #         validated_data['row_index'],
+        #         validated_data['start_time_in_millis'],
+        #         validated_data['end_time_in_millis'],
+        #         validated_data['status'],
+        #         validated_data['progress']
+        #         )
 

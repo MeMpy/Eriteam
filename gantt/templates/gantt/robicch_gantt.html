@@ -77,6 +77,8 @@
 
     {{ block.super }}
 
+    <script src="{% static 'gantt/robicch_gantt.js' %}"></script>
+
     <script type="text/javascript">
 
         var ge;  //this is the hugly but very friendly global var for the gantt editor
@@ -100,7 +102,7 @@
             $(".ganttButtonBar div").addClass('buttons');
 
             //simulate a data load from a server.
-            loadGanttFromServer();
+            loadGanttFromServer({{ project_id }});
 
 
             {#  //fill default Teamwork roles if any#}
@@ -130,93 +132,7 @@
 
         });
 
-        function loadGanttFromServer() {
 
-            var prof = new Profiler("loadServerSide");
-            prof.reset();
-
-            //TODO dynamic project id
-            $.getJSON("/gantt/robicch/api/project/1/", function (response) {
-                //console.debug(response);
-                if (response.ok) {
-                    prof.stop();
-
-                    ge.loadProject(response.project);
-                    ge.checkpoint(); //empty the undo stack
-
-                    if (typeof(callback) == "function") {
-                        callback(response);
-                    }
-                } else {
-                    jsonErrorHandling(response);
-                }
-
-            });
-        }
-
-        function saveGanttOnServer() {
-            if (!ge.canWrite)
-                return;
-
-
-            var prj = ge.saveProject();
-
-            delete prj.resources;
-            delete prj.roles;
-
-            var prof = new Profiler("saveServerSide");
-            prof.reset();
-
-            if (ge.deletedTaskIds.length > 0) {
-                if (!confirm("TASK_THAT_WILL_BE_REMOVED\n" + ge.deletedTaskIds.length)) {
-                    return;
-                }
-            }
-
-            var task = prj.tasks[5];
-            task.row_index = 5;
-            var parent = prj.tasks[0].id;
-            var csrftoken = getCookie('csrftoken');
-
-            $.ajaxSetup({
-                beforeSend: function (xhr, settings) {
-                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                    }
-                }
-            });
-
-            $.ajax("/gantt/robicch/api/project/1/task", {
-                dataType: "json",
-                data: {task: JSON.stringify(task), parent: parent},
-                type: "POST",
-
-                success: function (response) {
-                    if (response.ok) {
-                        prof.stop();
-                        if (response.project) {
-                            ge.loadProject(response.project); //must reload as "tmp_" ids are now the good ones
-                        } else {
-                            ge.reset();
-                        }
-                    } else {
-                        var errMsg = "Errors saving project\n";
-                        if (response.message) {
-                            errMsg = errMsg + response.message + "\n";
-                        }
-
-                        if (response.errorMessages.length) {
-                            errMsg += response.errorMessages.join("\n");
-                        }
-
-                        alert(errMsg);
-                    }
-                }
-
-            });
-
-
-        }
 
     </script>
 
@@ -247,7 +163,7 @@
     <span class="ganttButtonSeparator"></span>
     <button onclick="editResources();" class="button textual" title="edit resources"><span class="teamworkIcon">M</span></button>
       &nbsp; &nbsp; &nbsp; &nbsp;
-      <button onclick="saveGanttOnServer();" class="button first big" title="save">save</button>
+      <button onclick="saveGanttOnServer({{ project_id }});" class="button first big" title="save">save</button>
     </div></div>
   --></div>
 

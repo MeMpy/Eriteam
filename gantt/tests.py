@@ -107,7 +107,7 @@ class TaskTestCase(TestCase):
         root_task = self.project.root_task
         root_task.addAssignment(self.resource)
 
-        self.assertEqual(root_task.resource_set.count(), 1)
+        self.assertEqual(root_task.assigned_to.count(), 1)
 
     def test_removeAssignment(self):
 
@@ -116,7 +116,7 @@ class TaskTestCase(TestCase):
 
         root_task.removeAssignment(self.resource.id)
 
-        self.assertEqual(root_task.resource_set.count(), 0)
+        self.assertEqual(root_task.assigned_to.count(), 0)
 
     def test_delete_project(self):
 

@@ -84,18 +84,26 @@ class Task(models.Model):
     # CONVERSION
     ##############################################
 
-    #TODO make properties
+
     def start_time_in_millis(self):
         return calcTimeInMillis(self.start_time)
 
     def end_time_in_millis(self):
         return calcTimeInMillis(self.end_time)
 
-    def set_start_time_from_millis(self, millis):
-        self.start_time = calcDateFromMillis(millis)
+    def set_start_time(self, start_time):
 
-    def set_end_time_from_millis(self, millis):
-        self.end_time = calcDateFromMillis(millis)
+        if isinstance(start_time, datetime.datetime):
+            self.start_time = start_time
+        elif isinstance(start_time, int):
+            self.start_time = calcDateFromMillis(start_time)
+
+    def set_end_time(self, end_time):
+
+        if isinstance(end_time, datetime.datetime):
+            self.end_time = end_time
+        elif isinstance(end_time, int):
+            self.end_time = calcDateFromMillis(end_time)
 
     ##############################################
     # RELATIONS
@@ -134,16 +142,8 @@ class Task(models.Model):
         task.code = code
         task.description = description
         task.row_index = row_index
-
-        if isinstance(start_time, datetime.datetime):
-            task.start_time = start_time
-        elif isinstance(start_time, int):
-            task.set_start_time_from_millis(start_time)
-
-        if isinstance(end_time, datetime.datetime):
-            task.end_time = end_time
-        elif isinstance(end_time, int):
-            task.set_end_time_from_millis(end_time)
+        task.set_start_time(start_time)
+        task.set_end_time(end_time)
 
         if status:
             task.status = status

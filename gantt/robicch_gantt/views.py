@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 from django.utils.six import BytesIO
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,6 +25,7 @@ class TaskListRob(APIView):
     All the project's tasks.
 
     """
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request, project_id):
         project = get_object_or_404(Project, pk=project_id)
@@ -48,13 +49,25 @@ class TaskListRob(APIView):
 
             return Response({'ok' : False, 'project': None})
 
+    def put(self, request, project_id, format=None):
+
+        project = get_object_or_404(Project, pk=project_id)
+        serializer = ProjectSerializerRob(project, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class TaskDetailRob(APIView):
     """
     Create, Update or delete a task instance.
     """
-    def get_object(self, project_id,task_id): #TODO refactor
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_task(self, project_id,task_id):
         try:
             project = get_object_or_404(Project, pk=project_id)
             return project.task_set.get(id=task_id)
@@ -63,7 +76,7 @@ class TaskDetailRob(APIView):
 
     def post(self, request, project_id, format=None):
 
-        task_parent = self.get_object(project_id=project_id, task_id=request.data['parent'])
+        task_parent = self.get_task(project_id=project_id, task_id=request.data['parent'])
         serializer = TaskSerializerRob(data=deserialize(request.data['task']))
         if serializer.is_valid():
             serializer.save(parent=task_parent)
@@ -71,7 +84,7 @@ class TaskDetailRob(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, project_id, format=None):
-        task = self.get_object(project_id, request.data['id'])
+        task = self.get_task(project_id, request.data['id'])
         serializer = TaskSerializerRob(task, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -79,11 +92,11 @@ class TaskDetailRob(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, project_id, format=None):
-        task = self.get_object(project_id, request.data['id'])
+        task = self.get_task(project_id, request.data['id'])
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-def robicch_gantt(request):
+def robicch_gantt(request, project_id):
 
-    return render(request, 'gantt/robicch_gantt.html')
+    return render(request, 'gantt/robicch_gantt.html', {'project_id': project_id})

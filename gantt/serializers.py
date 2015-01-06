@@ -25,9 +25,6 @@ class ResourceSerializer(serializers.ModelSerializer):
         model = Resource
         exclude=('user',)
 
-    def create(self, validated_data):
-        pass
-
 
 class ProjectSerializer(serializers.ModelSerializer):
 
