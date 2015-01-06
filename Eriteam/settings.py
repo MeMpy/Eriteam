@@ -98,3 +98,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
 
  )
+
+#https://docs.djangoproject.com/en/1.7/topics/db/transactions/#tying-transactions-to-http-requests
+ATOMIC_REQUESTS = True

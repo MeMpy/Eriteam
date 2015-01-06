@@ -101,6 +101,7 @@ class TaskTestCase(TestCase):
         t2.removeDependency(t1.id)
 
         self.assertEqual(t2.depends_on.count(), 0)
+        self.assertEqual(self.project.task_set.get(pk=t1.id),t1)
 
     def test_addAssignment(self):
 

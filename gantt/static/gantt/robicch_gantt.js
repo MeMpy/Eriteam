@@ -40,10 +40,6 @@ function saveGanttOnServer(project_id) {
         }
     }
 
-    //TODO save project instead of task
-    var task = prj.tasks[prj.tasks.length-1];
-    task.row_index = prj.tasks.length-1;
-    var parent = prj.tasks[0].id;
     var csrftoken = getCookie('csrftoken');
 
     $.ajaxSetup({
@@ -54,10 +50,10 @@ function saveGanttOnServer(project_id) {
         }
     });
 
-    $.ajax("/gantt/robicch/api/project/" + project_id + "/task", {
+    $.ajax("/gantt/robicch/api/project/" + project_id, {
         dataType: "json",
-        data: {task: JSON.stringify(task), parent: parent},
-        type: "POST",
+        data: {project: JSON.stringify(prj)},
+        type: "PUT",
 
         success: function (response) {
             if (response.ok) {

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from gantt.models import Task
+from gantt.robicch_gantt import helpers
 from gantt.serializers import AssignmentSerializer, TaskSerializer, ResourceSerializer, ProjectSerializer
 
 
@@ -10,6 +11,11 @@ class AssignmentSerializerRob(AssignmentSerializer):
     class Meta(AssignmentSerializer.Meta):
         exclude = AssignmentSerializer.Meta.exclude + ('resource',)
 
+
+class TaskListSerializerRob(serializers.ListSerializer):
+
+    def update(self, instance, validated_data):
+        pass
 
 
 class TaskSerializerRob(TaskSerializer):
@@ -28,6 +34,8 @@ class TaskSerializerRob(TaskSerializer):
 
     class Meta(TaskSerializer.Meta):
         exclude = TaskSerializer.Meta.exclude + ('start_time','end_time','depends_on', 'parent')
+        list_serializer_class = TaskListSerializerRob
+        
 
 
     def __init__(self, *args, **kwargs):
@@ -53,25 +61,6 @@ class TaskSerializerRob(TaskSerializer):
                 dep_str.append(repr(d.finish_task.row_index))
         return  ",".join(dep_str)
 
-    ##############################################
-    # ACTIONS
-    ##############################################
-
-    def create(self, validated_data):
-        parent = validated_data.pop('parent')
-
-        assert isinstance(parent, Task)
-        return parent.addTask(
-                validated_data['name'],
-                validated_data['code'],
-                validated_data['description'],
-                validated_data['row_index'],
-                validated_data['start_time_in_millis'],
-                validated_data['end_time_in_millis'],
-                validated_data['status'],
-                validated_data['progress']
-                )
-
 
 class ProjectSerializerRob(ProjectSerializer):
 
@@ -81,18 +70,17 @@ class ProjectSerializerRob(ProjectSerializer):
     # ACTIONS
     ##############################################
 
-    def create(self, validated_data):
+    def update(self, instance, validated_data):
+
         user = validated_data.pop('user')
 
+        tasks = self._initial_data['tasks']
 
-        # return parent.addTask(
-        #         validated_data['name'],
-        #         validated_data['code'],
-        #         validated_data['description'],
-        #         validated_data['row_index'],
-        #         validated_data['start_time_in_millis'],
-        #         validated_data['end_time_in_millis'],
-        #         validated_data['status'],
-        #         validated_data['progress']
-        #         )
+        for i in range(len(tasks)):
+            helpers.save_task(instance, tasks[i],i,tasks)
+
+        for i in range(len(tasks)):
+            helpers.save_dependencies(instance, tasks[i], tasks)
+
+        return instance
 

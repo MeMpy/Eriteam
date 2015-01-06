@@ -74,7 +74,7 @@ class Task(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
-    duration = models.FloatField()  # calculated each time you save the instance
+    duration = models.FloatField()
 
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=DEFAULT_STATUS)
 
@@ -85,25 +85,46 @@ class Task(models.Model):
     ##############################################
 
 
-    def start_time_in_millis(self):
-        return calcTimeInMillis(self.start_time)
-
-    def end_time_in_millis(self):
-        return calcTimeInMillis(self.end_time)
-
-    def set_start_time(self, start_time):
+    def _set_start_time(self, start_time):
 
         if isinstance(start_time, datetime.datetime):
             self.start_time = start_time
         elif isinstance(start_time, int):
             self.start_time = calcDateFromMillis(start_time)
 
-    def set_end_time(self, end_time):
+    def _set_end_time(self, end_time):
 
         if isinstance(end_time, datetime.datetime):
             self.end_time = end_time
         elif isinstance(end_time, int):
             self.end_time = calcDateFromMillis(end_time)
+
+    def set_duration(self, start_time, duration=None, end_time=None):
+        """
+
+        :param start_time:
+        :param end_time:
+        :param duration:
+        :return:
+        """
+        if not end_time and not duration:
+            raise Exception("You must specify at least one arg between end_time and duration")
+
+        self._set_start_time(start_time)
+        if duration:
+            self.duration = duration
+            self.end_time = self.start_time + datetime.timedelta(days=10)
+        else:
+            self._set_end_time(end_time)
+            self.duration = calcDurationInDays(self.end_time, self.start_time)
+
+
+    def start_time_in_millis(self):
+        return calcTimeInMillis(self.start_time)
+
+    def end_time_in_millis(self):
+        return calcTimeInMillis(self.end_time)
+
 
     ##############################################
     # RELATIONS
@@ -131,7 +152,7 @@ class Task(models.Model):
     # ACTIONS
     #######################################################################
 
-    def addTask(self, name, code, description, row_index, start_time, end_time, status=None, progress=None, depends_on=None):
+    def addTask(self, name, code, description, row_index, start_time, end_time=None, duration=None, status=None, progress=None, depends_on=None):
         """
         Add a new task
         :argument depends_on can be a task or a list of task that the new task depends on.
@@ -142,8 +163,7 @@ class Task(models.Model):
         task.code = code
         task.description = description
         task.row_index = row_index
-        task.set_start_time(start_time)
-        task.set_end_time(end_time)
+        task.set_duration(start_time, duration=duration, end_time=end_time)
 
         if status:
             task.status = status
@@ -188,7 +208,7 @@ class Task(models.Model):
         """
         Remove the dependency this task has with the task identified by taskId
         """
-        self.depends_on.filter(id=taskId).delete()
+        self.dependency_set.filter(finish_task__id=taskId).delete()
 
     def addAssignment(self, resource, effort=None):
         """
@@ -220,7 +240,6 @@ class Task(models.Model):
 
     def save(self, **kwargs):
 
-        self.duration = calcDurationInDays(self.end_time, self.start_time)
         self.level = self.parent.level+1 if self.parent else 0
 
         super(Task, self).save(**kwargs)
@@ -281,6 +300,5 @@ def after_save_project(sender, instance, created, **kwargs):
         root_task.code = "{prj_name}_root".format(prj_name=instance.name)
         root_task.row_index = 0
         root_task.parent = None
-        root_task.start_time = instance.start_time
-        root_task.end_time = instance.end_time
+        root_task.set_duration(instance.start_time, end_time=instance.end_time)
         root_task.save()

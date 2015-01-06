@@ -52,11 +52,24 @@ class TaskListRob(APIView):
     def put(self, request, project_id, format=None):
 
         project = get_object_or_404(Project, pk=project_id)
-        serializer = ProjectSerializerRob(project, data=request.data)
+        serializer = ProjectSerializerRob(project, data=deserialize(request.data['project']))
 
         if serializer.is_valid():
             serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            extra_info = {
+                "canWrite":True,
+                "canWriteOnParent":True,
+                "selectedRow":0,
+                "deletedTaskIds":[]
+            }
+
+            extra_info.update(serializer.data)
+
+            resp = {'ok': True, 'project': extra_info}
+
+            return Response(resp)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
