@@ -1,5 +1,7 @@
 #Before to ask any questions read this:
 # http://roberto.open-lab.com/2012/08/24/jquery-gantt-editor/
+from gantt.models import Resource
+
 
 def find_parent(i, t, tasks):
     """
@@ -112,3 +114,17 @@ def save_dependencies(instance, t, tasks):
                 dep_id = tasks[int(d)]['id']
                 task.addDependency(dep_id)
 
+
+def save_assignments(instance, t):
+    """
+    For each task we rebuild its assignments
+    """
+
+    #reset all current assignments
+    task = instance.task_set.get(pk=t['id'])
+    task.assignment_set.all().delete()
+
+    if t['assigs']:
+        for ass in t['assigs']:
+            r = Resource.objects.get(pk=ass['resourceId'])
+            task.addAssignment(r, ass['effort'])

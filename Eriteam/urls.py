@@ -5,10 +5,12 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'Eriteam.views.home', name='home'),
+
     # url(r'^blog/', include('blog.urls')),
+    url(r'^$', 'Eriteam.views.home', name='home'),
     url(r'^grappelli/', include('grappelli.urls')), # grappelli URLS
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^gantt/', include('gantt.urls')),
+    url(r'^gantt/', include('gantt.urls', namespace='gantt')),
+    url(r'^gantt/', include('gantt.urls', namespace='gantt')),
 )

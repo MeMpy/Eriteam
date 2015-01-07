@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 
 def calcDurationInDays(end_time, start_time):
@@ -15,7 +16,8 @@ def calcTimeInMillis(dt):
     return int(delta.total_seconds() * 1000)
 
 def calcDateFromMillis(ms):
-    return datetime.datetime.fromtimestamp(ms/1000.0)
+    d = datetime.datetime.fromtimestamp(ms/1000.0)
+    return timezone.make_aware(d, timezone.utc)
 
 
 # Create your models here.

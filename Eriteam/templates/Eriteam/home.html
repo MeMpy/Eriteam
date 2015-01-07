@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Eriteam: The Ericsson work management system written in Django</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+<h1>Eriteam: The Ericsson work management system written in Django</h1>
+
+{% if not projects %}
+
+    <h2>No projects inserted</h2>
+
+{% else %}
+<div style="width: 99%">
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading"><h2>Projects chart</h2></div>
+        <div class="panel-body">
+            <p>Charts created using <a href="http://roberto.open-lab.com/2012/08/24/jquery-gantt-editor/">jQuery Gantt
+                editor</a></p>
+        </div>
+
+        <!-- List group -->
+        <ul class="list-group">
+            {% for p in projects %}
+                <li class="list-group-item"><a href="{% url 'gantt:robicch:chart' p.id %}"> {{ p }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="panel panel-default" style="float: left; margin-right: 0.9em">
+        <!-- Default panel contents -->
+        <div class="panel-heading"><h2>Projects general api</h2></div>
+        <div class="panel-body">
+            <p>Restfull services not related to any specific client application </p>
+            <i> powered by <a href="http://www.django-rest-framework.org/">http://www.django-rest-framework.org/</a>
+            </i>
+        </div>
+
+        <!-- List group -->
+        <ul class="list-group">
+            {% for p in projects %}
+                <li class="list-group-item"><a href="{% url 'gantt:api_get' p.id %}"> {{ p }} READ</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="panel panel-default" style="float: left">
+        <!-- Default panel contents -->
+        <div class="panel-heading"><h2>Projects specific api</h2></div>
+        <div class="panel-body">
+            <p>Restfull services adapted to specific client application </p>
+            <i> powered by <a href="http://www.django-rest-framework.org/">http://www.django-rest-framework.org/</a>
+            </i>
+        </div>
+
+        <!-- List group -->
+        <ul class="list-group">
+            {% for p in projects %}
+                <li class="list-group-item"><a href="{% url 'gantt:robicch:api_get' p.id %}"> {{ p }} READ</a></li>
+                <li class="list-group-item"><a href="{% url 'gantt:robicch:api_post' p.id %}"> {{ p }} WRITE</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+{% endif %}
+
+</body>
+</html>

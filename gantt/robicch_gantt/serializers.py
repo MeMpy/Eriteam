@@ -12,12 +12,6 @@ class AssignmentSerializerRob(AssignmentSerializer):
         exclude = AssignmentSerializer.Meta.exclude + ('resource',)
 
 
-class TaskListSerializerRob(serializers.ListSerializer):
-
-    def update(self, instance, validated_data):
-        pass
-
-
 class TaskSerializerRob(TaskSerializer):
 
     start = serializers.IntegerField(source='start_time_in_millis')
@@ -34,9 +28,6 @@ class TaskSerializerRob(TaskSerializer):
 
     class Meta(TaskSerializer.Meta):
         exclude = TaskSerializer.Meta.exclude + ('start_time','end_time','depends_on', 'parent')
-        list_serializer_class = TaskListSerializerRob
-        
-
 
     def __init__(self, *args, **kwargs):
 
@@ -81,6 +72,9 @@ class ProjectSerializerRob(ProjectSerializer):
 
         for i in range(len(tasks)):
             helpers.save_dependencies(instance, tasks[i], tasks)
+
+        for i in range(len(tasks)):
+            helpers.save_assignments(instance, tasks[i])
 
         return instance
 
