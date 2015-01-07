@@ -89,7 +89,7 @@ class Task(models.Model):
 
         if isinstance(start_time, datetime.datetime):
             self.start_time = start_time
-        elif isinstance(start_time, int):
+        elif isinstance(start_time, ( int, long )):
             self.start_time = calcDateFromMillis(start_time)
 
     def _set_end_time(self, end_time):
@@ -113,7 +113,7 @@ class Task(models.Model):
         self._set_start_time(start_time)
         if duration:
             self.duration = duration
-            self.end_time = self.start_time + datetime.timedelta(days=10)
+            self.end_time = self.start_time + datetime.timedelta(days=duration)
         else:
             self._set_end_time(end_time)
             self.duration = calcDurationInDays(self.end_time, self.start_time)

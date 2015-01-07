@@ -74,7 +74,7 @@ class ProjectSerializerRob(ProjectSerializer):
 
         user = validated_data.pop('user')
 
-        tasks = self._initial_data['tasks']
+        tasks = self.initial_data['tasks']
 
         for i in range(len(tasks)):
             helpers.save_task(instance, tasks[i],i,tasks)
