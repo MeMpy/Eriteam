@@ -1,6 +1,6 @@
 #Before to ask any questions read this:
 # http://roberto.open-lab.com/2012/08/24/jquery-gantt-editor/
-from gantt.models import Resource
+from gantt.models import Resource, Task
 
 
 def find_parent(i, t, tasks):
@@ -20,6 +20,21 @@ def find_parent(i, t, tasks):
         j = j - 1
     #this is the parent
     return j
+
+def get_task(project, t):
+    """
+    Get the task from the project's task_Set. Return the task
+    Returns None if no task can be found
+    """
+    if isinstance(t['id'], int):
+        try:
+            task = project.task_set.get(pk=t['id'])
+        except Task.DoesNotExist:
+            task=None
+    else:
+        task=None
+
+    return task
 
 def save_task(project, t, i, tasks):
     """
@@ -54,9 +69,9 @@ def save_task(project, t, i, tasks):
         task_parent = None
 
     #base step
-    if isinstance(t['id'], int):
-        #the task already exists, we need to update it
-        task = project.task_set.get(pk=t['id'])
+    task= get_task(project,t)
+    #the task already exists, we need to update it
+    if task:
         #keys: [u'status', u'assigs', u'hasChild', u'code', u'end', u'description', u'level', u'startIsMilestone',
         # u'start', u'depends', u'canWrite', u'duration', u'progress', u'endIsMilestone', u'id', u'name']
         task.status = t['status']

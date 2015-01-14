@@ -50,9 +50,11 @@ function saveGanttOnServer(project_id) {
         }
     });
 
+    put_data = {project: JSON.stringify(prj)};
     $.ajax("/gantt/robicch/api/project/" + project_id, {
         dataType: "json",
-        data: {project: JSON.stringify(prj)},
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(put_data),
         type: "PUT",
 
         success: function (response) {

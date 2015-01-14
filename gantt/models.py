@@ -58,7 +58,7 @@ class Task(models.Model):
         ("STATUS_SUSPENDED", "STATUS_SUSPENDED"),
         ("STATUS_UNDEFINED", "STATUS_UNDEFINED")
     )
-    DEFAULT_STATUS = ("STATUS_ACTIVE", "STATUS_ACTIVE")
+    DEFAULT_STATUS = "STATUS_ACTIVE"
 
     name = models.CharField(max_length=150)
 
